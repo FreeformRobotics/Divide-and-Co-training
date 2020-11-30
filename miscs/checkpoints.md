@@ -8,7 +8,10 @@ Each zip file contains 4 types of files
 * `tensorboard` log file, you can use `tensorboard` to visualize the log. It is in the `val` directory within the zip file.
 
 Hope you have fun with these checkpoints.
-Any issues about checkpoints should be raised at https://github.com/mzhaoshuai/SplitNet-Divide-and-Co-training/issues/2.
+Any issues about checkpoints should be raised at
+[![checkpoints](https://img.shields.io/badge/issue-3-yellow)](https://github.com/mzhaoshuai/SplitNet-Divide-and-Co-training/issues/3).
+
+
 
 
 ## ImageNet
