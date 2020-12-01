@@ -1,4 +1,5 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![arXiv](https://img.shields.io/badge/cs.CV-%09arXiv%3A2011.14660-red)](https://arxiv.org/abs/2011.14660)
 
 # SplitNet: Divide and Co-training
 
@@ -24,7 +25,7 @@ by dividing one existing large network into several small ones and co-training.
 <div align="justify">
 
 This is the code for the paper 
-<a href="(TODO)">SplitNet: Divide and Co-training.</a>
+<a href="https://arxiv.org/abs/2011.14660">SplitNet: Divide and Co-training.</a>
 <br />
 
 The width of a neural network matters since increasing
