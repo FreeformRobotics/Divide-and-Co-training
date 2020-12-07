@@ -17,6 +17,7 @@ by dividing one existing large network into several small ones and co-training.
 * [Training](#Training)
 * [Evaluation](#Evaluation)
 * [Citations](#Citations)
+* [Licenses](#Licenses)
 * [Acknowledgements](#Acknowledgements)
 <!--te-->
 
@@ -292,6 +293,20 @@ Then run
   year = {2020}
 }
 ```
+
+
+## Licenses
+Most of the code here is licensed Apache 2.0.
+However, this repo contains much third party code.
+It is your responsibility to ensure you comply with license
+here and conditions of any dependent licenses
+
+
+As for the core code of splitnet (i.e., code about dividing the model and co-training)
+and the pretrained models, they are under the CC-BY-NC 4.0 license.
+See [LICENSE](miscs/LICENSE) for additional details.
+Hope you can understand this because this work is funded by a for-profit company.
+
 
 ## Acknowledgements
 
