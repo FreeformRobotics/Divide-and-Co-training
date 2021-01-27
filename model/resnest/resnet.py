@@ -126,6 +126,7 @@ class Bottleneck(nn.Module):
 
         return out
 
+
 class ResNet(nn.Module):
     """ResNet Variants
 

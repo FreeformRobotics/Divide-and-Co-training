@@ -374,7 +374,7 @@ class SENet(nn.Module):
 			print('INFO:PyTorch: Using {} within blocks'.format(self.drop_type))
 			block_drop_p = block_drop_p / (split_factor ** 0.5)
 			n = sum(layers)
-			if self.drop_type == 'dropout':
+			if self.drop_type in ['dropout', 'droppath']:
 				self.block_drop_ps = [block_drop_p * (i + 1) / (n + 1) for i in range(n)]
 			else:
 				block_drop_flag = [False, False, True, True]

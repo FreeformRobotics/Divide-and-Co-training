@@ -3,7 +3,7 @@
 
 # SplitNet: Divide and Co-training
 
-SplitNet achieves 98.71%(CIFAR-10), 89.46%(CIFAR-100), and 83.34%(ImageNet, 416px)
+SplitNet achieves 98.71% on CIFAR-10, 89.46% on CIFAR-100, and 83.60% on ImageNet (SE-ResNet-101, 64x4d, 320px)
 by dividing one existing large network into several small ones and co-training.
 
 ##  Table of Contents
@@ -12,7 +12,7 @@ by dividing one existing large network into several small ones and co-training.
 * [Introduction](#Introduction)
 * [Features and TODO](#Features-and-TODO)
 * [Results and Checkpoints](#Results-and-Checkpoints)
-    * [Checkpoints](miscs/checkpoints.md)
+    * [Benchmarks and Checkpoints](miscs/checkpoints.md)
 * [Installation](#Installation)
 * [Training](#Training)
 * [Evaluation](#Evaluation)
@@ -20,6 +20,11 @@ by dividing one existing large network into several small ones and co-training.
 * [Licenses](#Licenses)
 * [Acknowledgements](#Acknowledgements)
 <!--te-->
+
+
+## News
+- [2021/01/27] Add new results (83.60%) on ImageNet. Upload a new model, ResNeXSt, a combination of ResNeSt and ResNeXt.
+
 
 ## Introduction
 
@@ -65,7 +70,7 @@ through extensive experiments.
 
 ## Features and TODO
 
-- [x] Support SplitNet with different models, i.e., ResNet, Wide-ResNet, ResNeXt, SENet,
+- [x] Support SplitNet with different models, i.e., ResNet, Wide-ResNet, ResNeXt, ResNeXSt, SENet,
 Shake-Shake, DenseNet, PyramidNet (+Shake-Drop), EfficientNet. Also support ResNeSt without SplitNet.
 - [x] Different data augmentation methods, i.e., mixup, random erasing, auto-augment, rand-augment, cutout
 - [x] Distributed training (tested with multi-GPUs on single machine)
@@ -99,9 +104,9 @@ Experiments on ImageNet are conducted on a single machine with 8 RTX 2080Ti GPUs
 </div>
 
 
-### Checkpoints
+### Benchmarks and Checkpoints
 
-[Checkpoints](miscs/checkpoints.md)
+[Benchmarks and Checkpoints](miscs/checkpoints.md)
 
 ## Installation
 
@@ -289,7 +294,7 @@ Then run
 @misc{2020_SplitNet,
   author =   {Shuai Zhao and Liguang Zhou and Wenxiao Wang and Deng Cai and Tin Lun Lam and Yangsheng Xu},
   title =    {SplitNet: Divide and Co-training},
-  howpublished = {ArXiv},
+  howpublished = {arXiv},
   year = {2020}
 }
 ```

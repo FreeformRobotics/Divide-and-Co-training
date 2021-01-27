@@ -8,6 +8,7 @@ from torch.nn.modules.utils import _pair
 
 __all__ = ['SplAtConv2d']
 
+
 class SplAtConv2d(Module):
     """Split-Attention Conv2d
     """
@@ -55,10 +56,10 @@ class SplAtConv2d(Module):
         batch, rchannel = x.shape[:2]
         if self.radix > 1:
             if torch.__version__ < '1.5':
-                splited = torch.split(x, int(rchannel//self.radix), dim=1)
+                splited = torch.split(x, int(rchannel // self.radix), dim=1)
             else:
-                splited = torch.split(x, rchannel//self.radix, dim=1)
-            gap = sum(splited) 
+                splited = torch.split(x, rchannel // self.radix, dim=1)
+            gap = sum(splited)
         else:
             gap = x
         gap = F.adaptive_avg_pool2d(gap, 1)
@@ -81,6 +82,7 @@ class SplAtConv2d(Module):
             out = atten * x
         return out.contiguous()
 
+
 class rSoftMax(nn.Module):
     def __init__(self, radix, cardinality):
         super().__init__()
@@ -96,4 +98,3 @@ class rSoftMax(nn.Module):
         else:
             x = torch.sigmoid(x)
         return x
-

@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .mixup import mixup_data, mixup_criterion
-from . import pyramidnet, densenet, densenet3
+from . import pyramidnet, densenet, densenet3, resnexst
 from . import resnet, resnest, senet, efficientnet, shake_shake
 from . import efficientnet_pytorch as lukemelas_eff
 
@@ -18,8 +18,7 @@ __all__ = ['SplitNet']
 
 
 def _get_net(arch='resnet50'):
-	"""get the backnbone net of the segmentation model"""
-	# A map from network name to network object.
+	"""get the backnbone net"""
 	networks_obj_dict = {
 		# For ImageNet
 		'resnet50': resnet.resnet50,
@@ -43,6 +42,10 @@ def _get_net(arch='resnet50'):
 		'resnest101': resnest.resnest101,
 		'resnest200': resnest.resnest200,
 		'resnest269': resnest.resnest269,
+		'resnexst50_4x16d': resnexst.resnexst50_4x16d,
+		'resnexst50_8x16d': resnexst.resnexst50_8x16d,
+		'resnexst50_4x32d': resnexst.resnexst50_4x32d,
+		'resnexst101_8x32d': resnexst.resnexst101_8x32d,
 		# For CIFAR/SVHN
 		'resnet110': resnet.resnet110,
 		'resnet164': resnet.resnet164,
@@ -118,7 +121,18 @@ class SplitNet(nn.Module):
 				models.append(_get_net(self.arch)(num_classes=args.num_classes,
 													pretrained=None,
 													**model_kwargs))
-		
+
+		elif 'resnexst' in self.arch:
+			model_kwargs = {'dataset': args.dataset,
+							'split_factor': self.split_factor,
+							'crop_size': args.crop_size,
+							}
+
+			for i in range(self.loop_factor):
+				models.append(_get_net(self.arch)(num_classes=args.num_classes,
+													pretrained=None,
+													**model_kwargs))
+
 		elif 'efficientnet' in self.arch:
 			
 			if args.is_lukemelas_efficientnet:
@@ -129,6 +143,7 @@ class SplitNet(nn.Module):
 									'split_factor': self.split_factor,
 									'is_user_crop_size': args.is_efficientnet_user_crop,
 									'user_crop_size': args.crop_size,
+									'drop_connect_rate': 0.0,
 								}
 				for i in range(self.loop_factor):
 					if not args.pretrained:

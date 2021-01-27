@@ -47,8 +47,10 @@ def add_parser_params(parser):
 									'efficientnetb4', 'efficientnetb5',
 									'efficientnetb6', 'efficientnetb7',
 									'efficientnetb8', 'efficientnetl2',
-									'resnest101',
-									'resnest200', 'resnest269'],
+									'resnest101', 'resnest200', 'resnest269',
+									'resnexst50_4x16d', 'resnexst50_8x16d',
+									'resnexst50_4x32d',
+									'resnexst101_8x32d'],
 							help='The name of the neural architecture (default: resnet50)')
 
 	parser.add_argument('--norm_mode', type=str, default='batch',
@@ -395,7 +397,7 @@ def add_parser_params(parser):
 		raise NotImplementedError
 
 	# settings about training epochs and learning rate
-	if args.epochs in [90, 100, 120]:
+	if args.epochs in [90, 100, 120, 270, 350]:
 		args.slow_start_epochs = 5
 		args.eval_per_epoch = 1
 		args.lr_milestones = [30, 60, 90]
@@ -466,19 +468,24 @@ def add_parser_params(parser):
 								'se_resnext101_64x4d', 'se_resnext101_64x4d_B',
 								'se_resnet152', 'senet154', 'senet113',
 								'wide_resnet50_2', 'wide_resnet50_3', 'wide_resnet101_2',
-								'resnest101', 'resnest200', 'resnest269']:
+								'resnest101', 'resnest200', 'resnest269',
+								'resnexst50_32x4d', 'resnexst50_16x8d',
+								'resnexst50_4x16d', 'resnexst50_8x16d',
+								'resnexst50_4x32d', 'resnexst101_8x32d']:
 				# For WRN, original weight decay is 5e-4
 				# https://github.com/szagoruyko/wide-residual-networks
 				# https://github.com/szagoruyko/wide-residual-networks/blob/master/pretrained/README.md
 				args.weight_decay = 1e-4
 				
-				if args.arch in ['se_resnext101_64x4d_B', 'senet113']:
-					args.is_mixup = False
+				if args.arch in ['se_resnext101_64x4d_B', 'senet113', 'resnexst101_8x32d']:
+					# args.is_mixup = False if args.arch != 'resnexst101_8x32d' else True
 					args.is_autoaugment = False
 					args.randaa = 'rand-m9-mstd0.5'
+					args.lr = args.lr * (1.0 * args.batch_size / 256)
 				
-				if 'se_resnet50' in args.arch:
-					args.is_mixup = False
+				if args.arch in ['resnexst50_32x4d', 'se_resnet50',
+									'resnexst50_4x16d', 'resnexst50_8x16d', 'resnexst50_4x32d']:
+					# args.is_mixup = False if 'resnexst' not in args.arch else True
 					args.is_autoaugment = False
 					args.randaa = 'rand-m6-mstd0.5'
 

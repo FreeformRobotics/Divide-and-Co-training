@@ -18,11 +18,14 @@ import numpy as np
 
 import torch
 import torch.cuda.amp as amp
+import torch.nn.functional as F
 
 import parser_params
 from model import splitnet
 from dataset import factory
 from utils import metric, norm
+
+_GEO_TEST = True
 
 
 class data_prefetcher_2gpus():
@@ -58,7 +61,7 @@ class data_prefetcher_2gpus():
 		return images_gpu0, target, images_gpu1
 
 
-def multigpu_test(args):
+def multigpu_test_2gpus(args):
 	"""
 	This is a simple program for validating the idea of parallel runing of multiple
 	model on multiple gpus.
@@ -132,32 +135,17 @@ def multigpu_test(args):
 				else:
 					output_gpu0 = cuda_models[0](images_gpu0)
 					output_gpu1 = cuda_models[1](images_gpu1)
-
-				outputs = torch.stack([output_gpu0, output_gpu1.cuda(0)])
-				ensemble_output = torch.mean(outputs, dim=0)
-
-				"""mutiple gpu version (num_gpus >= 1)
-				cuda_images = []
-				cuda_outpouts = []
-				collect_outputs = []
-				target = target.cuda(0, non_blocking=True)
-				for idx in range(1, args.split_factor):
-					cuda_images.append(images.cuda(idx, non_blocking=True))
-
-				if args.is_amp:
-					with amp.autocast():
-						for idx in range(args.split_factor):
-							cuda_outpouts.append(cuda_models[idx](cuda_images[idx]))
+				
+				if _GEO_TEST:
+					if i == 1:
+						print("using geometry mean")
+					output_gpu0 = F.softmax(output_gpu0, dim=-1)
+					output_gpu1 = F.softmax(output_gpu1, dim=-1)
+					ensemble_output = torch.sqrt(output_gpu0 * output_gpu1.cuda(0))
 				else:
-					for idx in range(args.split_factor):
-						cuda_outpouts.append(cuda_models[idx](cuda_images[idx]))
+					outputs = torch.stack([output_gpu0, output_gpu1.cuda(0)])
+					ensemble_output = torch.mean(outputs, dim=0)
 
-				for idx in range(args.split_factor):
-					# use the first gpu as host gpu
-					collect_outputs.append(cuda_outpouts[idx])
-				outputs = torch.stack(collect_outputs, dim=0)
-				ensemble_output = torch.mean(outputs, dim=0)
-				"""
 			else:
 				# compute outputs and losses
 				if args.is_amp:
@@ -209,6 +197,128 @@ def multigpu_test(args):
 		acc_info += "\t avg_acc {:.3f}".format(mean_acc / args.split_factor)
 		"""
 		print(acc_info)
+
+	print("multiple GPUs ({})".format(args.is_test_on_multigpus))
+	print("The tested architecture is {} with split_factor {}".format(args.arch, args.split_factor))
+	print("The number of the samples is {}".format(n_count))
+	print("The total testing time is {} second".format(time_cnt))
+	print("The average test time is {}ms per images".format(1000 * time_cnt / n_count))
+
+	torch.cuda.empty_cache()
+	sys.exit(0)
+
+
+def multigpu_test(args):
+	"""
+	This is a simple program for validating the idea of parallel runing of multiple
+	model on multiple gpus.
+	"""
+	model = splitnet.SplitNet(args, norm_layer=norm.norm(args.norm_mode), criterion=None)
+
+	# optionally resume from a checkpoint
+	if args.resume:
+		if os.path.isfile(args.resume):
+			print("INFO:PyTorch: => loading checkpoint '{}'".format(args.resume))
+			checkpoint = torch.load(args.resume)
+			old_dict = checkpoint['state_dict']
+			# orignial ckpt was save as nn.parallel.DistributedDataParallel() object
+			old_dict = {k.replace("module.models", "models"): v for k, v in old_dict.items()}
+			model.load_state_dict(old_dict)
+			print("INFO:PyTorch: => loaded checkpoint"
+					" '{}' (epoch {})".format(args.resume, checkpoint['epoch']))
+		else:
+			print("INFO:PyTorch: => no checkpoint found at '{}'".format(args.resume))
+
+	# accelarate the training
+	torch.backends.cudnn.benchmark = True
+
+	val_loader = factory.get_data_loader(args.data,
+											batch_size=args.eval_batch_size,
+											crop_size=args.crop_size,
+											dataset=args.dataset,
+											split="val",
+											num_workers=args.workers)
+	# record the top1 accuray of each small network
+	top1_all = []
+	for i in range(args.loop_factor):
+		top1_all.append(metric.AverageMeter('{}_Acc@1'.format(i), ':6.2f'))
+	avg_top1 = metric.AverageMeter('Avg_Acc@1', ':6.2f')
+	avg_top5 = metric.AverageMeter('Avg_Acc@1', ':6.2f')
+	progress = metric.ProgressMeter(len(val_loader), *top1_all, avg_top1, avg_top5, prefix='Test: ')
+
+	# switch to evaluate mode
+	model.eval()
+	n_count = 0.0
+
+	# move model to the gpu
+	cuda_models = []
+	for idx in range(args.split_factor):
+		cuda_models.append(model.models[idx].cuda(idx))
+	start_time = time.time()
+
+	for i, (images, target) in enumerate(val_loader):
+		cuda_images = []
+		cuda_outpouts = []
+		collect_outputs = []
+		target = target.cuda(0, non_blocking=True)
+		for idx in range(args.split_factor):
+			cuda_images.append(images.cuda(idx, non_blocking=True))
+
+		if args.is_amp:
+			with amp.autocast():
+				for idx in range(args.split_factor):
+					cuda_outpouts.append(cuda_models[idx](cuda_images[idx]))
+		else:
+			for idx in range(args.split_factor):
+				cuda_outpouts.append(cuda_models[idx](cuda_images[idx]))
+
+		for idx in range(args.split_factor):
+			# use the first gpu as host gpu
+			collect_outputs.append(cuda_outpouts[idx].cuda(0))
+
+		if _GEO_TEST:
+			if i == 1:
+				print("using geometry mean")
+			cmul = 1.0
+			for j in range(args.split_factor):
+				cmul = cmul * F.softmax(cuda_outpouts[j].cuda(0), dim=-1)
+			# ensemble_output = torch.pow(cmul, 1.0 / args.split_factor)
+			ensemble_output = torch.sqrt(cmul)
+		else:
+			outputs = torch.stack(collect_outputs, dim=0)
+			ensemble_output = torch.mean(outputs, dim=0)
+
+		batch_size_now = images.size(0)
+		"""
+		for j in range(args.loop_factor):
+			acc1, acc5 = metric.accuracy(outputs[j, ...], target, topk=(1, 5))
+			top1_all[j].update(acc1[0].item(), batch_size_now)
+		"""
+		# simply average outputs of small networks
+		avg_acc1, avg_acc5 = metric.accuracy(ensemble_output, target, topk=(1, 5))
+		avg_top1.update(avg_acc1[0].item(), batch_size_now)
+		avg_top5.update(avg_acc5[0].item(), batch_size_now)
+
+		n_count += batch_size_now
+		"""
+		if i % args.print_freq == 0:
+			progress.print(i)
+		"""
+	time_cnt = time.time() - start_time
+	# print accuracy info
+	acc_all = []
+	acc_all.append(avg_top1.avg)
+	acc_all.append(avg_top5.avg)
+	acc_info = '* Acc@1 {:.3f} Acc@5 {:.3f}'.format(acc_all[0], acc_all[1])
+	"""
+	mean_acc = 0.0
+	for j in range(args.loop_factor):
+		acc_all.append(top1_all[j].avg)
+		acc_info += '\t {}_acc@1 {:.3f}'.format(j, top1_all[j].avg)
+		mean_acc += top1_all[j].avg
+	acc_info += "\t avg_acc {:.3f}".format(mean_acc / args.split_factor)
+	"""
+	print(acc_info)
 
 	print("multiple GPUs ({})".format(args.is_test_on_multigpus))
 	print("The tested architecture is {} with split_factor {}".format(args.arch, args.split_factor))
@@ -414,5 +524,7 @@ if __name__ == '__main__':
 		if args.is_test_with_multistreams:
 			print("INFO:PyTorch: Test SplitNet with multi streams on single GPU")
 			multistreams_test(args)
+		elif args.split_factor <= 2:
+			multigpu_test_2gpus(args)
 		else:
 			multigpu_test(args)
