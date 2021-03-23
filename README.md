@@ -1,9 +1,9 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![arXiv](https://img.shields.io/badge/cs.CV-%09arXiv%3A2011.14660-red)](https://arxiv.org/abs/2011.14660)
 
-# SplitNet: Divide and Co-training
+# Divide and Co-training
 
-SplitNet achieves 98.71% on CIFAR-10, 89.46% on CIFAR-100, and 83.60% on ImageNet (SE-ResNet-101, 64x4d, 320px)
+Divide and co-training achieve 98.71% on CIFAR-10, 89.46% on CIFAR-100, and 83.60% on ImageNet (SE-ResNet-101, 64x4d, 320px)
 by dividing one existing large network into several small ones and co-training.
 
 ##  Table of Contents
@@ -31,31 +31,30 @@ by dividing one existing large network into several small ones and co-training.
 <div align="justify">
 
 This is the code for the paper 
-<a href="https://arxiv.org/abs/2011.14660">SplitNet: Divide and Co-training.</a>
+<a href="https://arxiv.org/abs/2011.14660">
+Towards Better Accuracy-efficiency Trade-offs: Divide and Co-training.</a>
 <br />
 
-The width of a neural network matters since increasing
-the width will necessarily increase the model capacity. However,
-the performance of a network does not improve linearly
-with the width and soon gets saturated. To tackle this problem,
-we propose to increase the number of networks rather
-than purely scaling up the width. To prove it, one large network
-is divided into several small ones, and each of these
-small networks has a fraction of the original one’s parameters.
-We then train these small networks together and make
-them see various views of the same data to learn different
-and complementary knowledge. During this co-training process,
-networks can also learn from each other. As a result,
-small networks can achieve better ensemble performance
+The width of a neural network matters since increasing the width
+will necessarily increase the model capacity.
+However, the performance of a network does not improve linearly
+with the width and soon gets saturated.
+In this case, we argue that increasing the number of networks (ensemble)
+can achieve better accuracy-efficiency trade-offs than purely increasing the width.
+To prove it,
+one large network is divided into several small ones
+regarding its parameters and regularization components.
+Each of these small networks has a fraction of the original one's parameters.
+We then train these small networks together and make them see various 
+views of the same data to increase their diversity.
+During this co-training process,
+networks can also learn from each other.
+As a result, small networks can achieve better ensemble performance
 than the large one with few or no extra parameters or FLOPs.
-This reveals that the number of networks is a new dimension
-of effective model scaling, besides depth/width/resolution.
 Small networks can also achieve faster inference speed
-than the large one by concurrent running on different devices.
-We validate the idea --- increasing the number of
-networks is a new dimension of effective model scaling ---
-with different network architectures on common benchmarks
-through extensive experiments.
+than the large one by concurrent running on different devices. 
+We validate our argument with 8 different neural architectures on
+common benchmarks through extensive experiments.
 </div>
 
 <div align=center>
@@ -70,8 +69,8 @@ through extensive experiments.
 
 ## Features and TODO
 
-- [x] Support SplitNet with different models, i.e., ResNet, Wide-ResNet, ResNeXt, ResNeXSt, SENet,
-Shake-Shake, DenseNet, PyramidNet (+Shake-Drop), EfficientNet. Also support ResNeSt without SplitNet.
+- [x] Support divide and co-training with different models, i.e., ResNet, Wide-ResNet, ResNeXt, ResNeXSt, SENet,
+Shake-Shake, DenseNet, PyramidNet (+Shake-Drop), EfficientNet.
 - [x] Different data augmentation methods, i.e., mixup, random erasing, auto-augment, rand-augment, cutout
 - [x] Distributed training (tested with multi-GPUs on single machine)
 - [x] Multi-GPUs synchronized BatchNormalization
@@ -197,7 +196,7 @@ wget -qO- https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/
 - Download [The SVHN dataset](http://ufldl.stanford.edu/housenumbers/) (*Format 2: Cropped Digits*),
 put them in the `dataset/svhn` directory.
 
-- `cd` to `github` directory and clone the `SplitNet-Divide-and-Co-training` repo.
+- `cd` to `github` directory and clone the `Divide-and-Co-training` repo.
 For brevity, rename it as `splitnet`.
 
 
@@ -291,9 +290,9 @@ Then run
 ## Citations
 
 ```
-@misc{2020_SplitNet,
+@misc{2020_splitnet,
   author =   {Shuai Zhao and Liguang Zhou and Wenxiao Wang and Deng Cai and Tin Lun Lam and Yangsheng Xu},
-  title =    {SplitNet: Divide and Co-training},
+  title =    {Towards Better Accuracy-efficiency Trade-offs: Divide and Co-training},
   howpublished = {arXiv},
   year = {2020}
 }

@@ -202,6 +202,7 @@ class SplitNet(nn.Module):
 		self.models = nn.ModuleList(models)
 		self.criterion = criterion
 		if args.is_identical_init:
+			print("INFO:PyTorch: Using identical initialization.")
 			self._identical_init()
 
 		# data transform - use different transformers for different networks
@@ -222,6 +223,7 @@ class SplitNet(nn.Module):
 		self.cot_weight_warm_up_epochs = args.cot_weight_warm_up_epochs
 		# self.kl_temperature = args.kl_temperature
 		self.cot_loss_choose = args.cot_loss_choose
+		print("INFO:PyTorch: The co-training loss is {}.".format(self.cot_loss_choose))
 		self.num_classes = args.num_classes
 
 	def forward(self, x, target=None, mode='train', epoch=0, streams=None):
@@ -335,6 +337,20 @@ class SplitNet(nn.Module):
 			H_mean = (- p_mean * torch.log(p_mean)).sum(-1).mean()
 			H_sep = (- p_all * F.log_softmax(outputs_all, dim=-1)).sum(-1).mean()
 			cot_loss = weight_now * (H_mean - H_sep)
+
+		elif loss_choose == 'kl_seperate':
+			outputs_all = torch.stack(outputs, dim=0)
+			# repeat [1,2,3] like [1,1,2,2,3,3] and [2,3,1,3,1,2]
+			outputs_r1 = torch.repeat_interleave(outputs_all, self.split_factor - 1, dim=0)
+			index_list = [j for i in range(self.split_factor) for j in range(self.split_factor) if j!=i]
+			outputs_r2 = torch.index_select(outputs_all, dim=0, index=torch.tensor(index_list, dtype=torch.long).cuda())
+			# calculate the KL divergence
+			kl_loss = F.kl_div(F.log_softmax(outputs_r1, dim=-1),
+												F.softmax(outputs_r2, dim=-1).detach(),
+												reduction='none')
+			# cot_loss = weight_now * (kl_loss.sum(-1).mean(-1).sum() / (self.split_factor - 1))
+			cot_loss = weight_now * (kl_loss.sum(-1).mean(-1).sum() / (self.split_factor - 1))
+		
 		else:
 			raise NotImplementedError
 
