@@ -25,19 +25,6 @@ __all__ = ['pyramidnet272', 'pyramidnet164']
 _inplace_flag = True
 
 
-"""
-splitnet/model/pyramidnet.py:175:
-UserWarning: Output 0 of ShakeDropFunctionBackward is a view and is being modified inplace.
-This view was created inside a custom Function (or because an input was returned as-is)
-and the autograd logic to handle view+inplace would override
-the custom backward associated with the custom Function,
-leading to incorrect gradients.
-This behavior is deprecated and will be forbidden starting version 1.6.
-You can remove this warning by cloning the output of the custom Function.
-(Triggered internally at  /opt/conda/conda-bld/pytorch_1595629403081/work/torch/csrc/autograd/variable.cpp:464.)
-"""
-
-
 class ShakeDropFunction(torch.autograd.Function):
 
 	@staticmethod
@@ -60,6 +47,7 @@ class ShakeDropFunction(torch.autograd.Function):
 		if gate.item() == 0:
 			beta = torch.cuda.FloatTensor(grad_output.size(0)).uniform_(0, 1)
 			beta = beta.view(beta.size(0), 1, 1, 1).expand_as(grad_output)
+			# beta = beta.reshape(beta.size(0), 1, 1, 1).expand_as(grad_output)
 			beta = Variable(beta)
 			return beta * grad_output, None, None, None
 		else:
@@ -186,10 +174,11 @@ class Bottleneck(nn.Module):
 			#padding = torch.autograd.Variable(
 			#			torch.zeros(batch_size, residual_channel - shortcut_channel, featuremap_size[0],
 			#							featuremap_size[1]).type_as(shortcut))
-			out += torch.cat((shortcut, padding), 1)
+			# out += torch.cat((shortcut, padding), 1)
+			out = out + torch.cat((shortcut, padding), 1)
 		else:
-			out += shortcut
-
+			# out += shortcut
+			out = out + shortcut
 		return out
 
 
@@ -364,3 +353,11 @@ def pyramidnet164(bottleneck=True, **kwargs):
 def pyramidnet272(bottleneck=True, **kwargs):
 	"""PyramidNet272 for CIFAR and SVHN"""
 	return PyramidNet(bottleneck=bottleneck, depth=272, alpha=200, **kwargs)
+
+
+if __name__ == "__main__":
+	model = pyramidnet164().cuda()
+	images = torch.rand(1, 3, 32, 32).cuda()
+	output = model(images)
+	loss = torch.mean(output) - 1.0
+	loss.backward()

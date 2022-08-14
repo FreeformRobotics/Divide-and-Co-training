@@ -23,6 +23,7 @@ by dividing one existing large network into several small ones and co-training.
 
 
 ## News
+- [2022/08/09] Our work is accepted to TIP! 
 - [2021/01/27] Add new results (83.60%) on ImageNet. Upload a new model, ResNeXSt, a combination of ResNeSt and ResNeXt.
 
 
@@ -50,19 +51,19 @@ views of the same data to increase their diversity.
 During this co-training process,
 networks can also learn from each other.
 As a result, small networks can achieve better ensemble performance
-than the large one with few or no extra parameters or FLOPs.
+than the large one with few or no extra parameters or FLOPs, \ie,
+achieving better accuracy-efficiency trade-offs.
 Small networks can also achieve faster inference speed
-than the large one by concurrent running on different devices. 
+than the large one by concurrent running.
+All of the above shows that the number of networks is a new dimension of model scaling.
 We validate our argument with 8 different neural architectures on
 common benchmarks through extensive experiments.
 </div>
 
-<div align=center>
+<!-- <div align=center>
   <img src="miscs/fig1_width.png" width="49%"/>
   <img src="miscs/fig3_latency.png" width="49%"/>
-</div>
-
-
+</div> -->
 <div align=center>
   <img src="miscs/fig2_framework.png" width="100%"/>
 </div>
@@ -75,6 +76,7 @@ Shake-Shake, DenseNet, PyramidNet (+Shake-Drop), EfficientNet.
 - [x] Distributed training (tested with multi-GPUs on single machine)
 - [x] Multi-GPUs synchronized BatchNormalization
 - [x] Automated mixed precision training
+- [x] dividing for object detection (dividing for SSD)
 - [ ] Asynchronous and distributed training of multiple models
 
 We are open to pull requests.
@@ -100,6 +102,13 @@ Experiments on ImageNet are conducted on a single machine with 8 RTX 2080Ti GPUs
 
 <div align=center>
    <img src="miscs/res_imagenet.png" width="100%"/>
+</div>
+
+
+### COCO val2017
+
+<div align=center>
+  <img src="miscs/coco.png" width="100%"/>
 </div>
 
 
@@ -290,11 +299,11 @@ Then run
 ## Citations
 
 ```
-@misc{2020_splitnet,
+@article{shuai2022divide,
   author =   {Shuai Zhao and Liguang Zhou and Wenxiao Wang and Deng Cai and Tin Lun Lam and Yangsheng Xu},
   title =    {Towards Better Accuracy-efficiency Trade-offs: Divide and Co-training},
-  howpublished = {arXiv},
-  year = {2020}
+  journal={IEEE Transactions on Image Processing},
+  year = {2022}
 }
 ```
 
@@ -303,8 +312,7 @@ Then run
 Most of the code here is licensed Apache 2.0.
 However, this repo contains much third party code.
 It is your responsibility to ensure you comply with license
-here and conditions of any dependent licenses
-
+here and conditions of any dependent licenses.
 
 As for the core code of splitnet (i.e., code about dividing the model and co-training)
 and the pretrained models, they are under the CC-BY-NC 4.0 license.
@@ -334,7 +342,13 @@ Hope you can understand this because this work is funded by a for-profit company
 * [Lyken17/pytorch-OpCounter](https://github.com/Lyken17/pytorch-OpCounter)
 * [Cerebras/online-normalization](https://github.com/Cerebras/online-normalization)
 * [maciejczyzewski/batchboost](https://github.com/maciejczyzewski/batchboost)
+* [ZFTurbo/Weighted-Boxes-Fusion](https://github.com/ZFTurbo/Weighted-Boxes-Fusion)
+* [uvipen/SSD-pytorch](https://github.com/uvipen/SSD-pytorch)
+* [NVIDIA/DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
+* [cheerss/CrossFormer](https://github.com/cheerss/CrossFormer)
+* [burcywu/agat](https://github.com/burcywu/agat)
 * [ZJULearning/RMI](https://github.com/ZJULearning/RMI)
+* [mzhaoshuai/CenterCLIP](https://github.com/mzhaoshuai/CenterCLIP)
 <!--te-->
 
 ![img_cad](miscs/zju_cad.jpg)

@@ -69,3 +69,15 @@ mixup, random erasing.
 | Shake-Shake 26 2x96d, S=4 | 98.31          | 26.3 / 3.81         | [shake_resnet26_2x96d_split4_cifar10_128_09](https://github.com/mzhaoshuai/SplitNet-Divide-and-Co-training/releases/download/1.0.2/shake_resnet26_2x96d_split4_cifar10_128_09_acc98.31.zip) |
 | PyramidNet-272            | 98.67          | 26.2 / 4.55         | [pyramidnet272_split1_cifar10_128_01_acc98.67](https://github.com/mzhaoshuai/SplitNet-Divide-and-Co-training/releases/download/1.0.2/pyramidnet272_split1_cifar10_128_01_acc98.67.zip) |
 | PyramidNet-272, S=4       | 98.71          | 32.6 / 6.33         | [pyramidnet272_split4_cifar10_128_05_acc98.71](https://github.com/mzhaoshuai/SplitNet-Divide-and-Co-training/releases/download/1.0.2/pyramidnet272_split4_cifar10_128_05_acc98.71.zip) |
+
+
+## COCO val2017 (SSD300)
+
+| Backbones                   | mAP | MParams/GFLOPs    | Checkpoints  |
+|---------------------------|----------------|---------------------|--------------|
+| WRN-50-2 				    | 30.3           | 39.3 / 48.1         | [ssd300_coco_ssdv2_02](https://github.com/mzhaoshuai/Divide-and-Co-training/releases/download/1.0.3/ssd300_coco_ssdv2_02_mAP30.3.zip) |
+| WRN-50-2, S=2             | 29.9           | 31.7 / 45.3         |  [ssd300_coco_ssdv2_06](https://github.com/mzhaoshuai/Divide-and-Co-training/releases/download/1.0.3/ssd300_coco_ssdv2_06.zip)|
+| WRN-50-3                  | 30.7           | 64.1 / 86.8         | [ssd300_coco_ssdv2_07](https://github.com/mzhaoshuai/Divide-and-Co-training/releases/download/1.0.3/ssd300_coco_ssdv2_07.zip) |
+| WRN-50-3, S=2 		    | 31.6           | 64.3 / 96.3         | [ssd300_coco_ssdv2_09](https://github.com/mzhaoshuai/Divide-and-Co-training/releases/download/1.0.3/ssd300_coco_ssdv2_09.zip) |
+| ResNeXt-101, 64x4d	 	| 32.6           | 68.9 / 90.1         | [ssd300_coco_ssdv2_14](https://github.com/mzhaoshuai/Divide-and-Co-training/releases/download/1.0.3/ssd300_coco_ssdv2_14.zip) |
+| ResNeXt-101, 64x4d, S=2   | 34.1           | 69.8 / 100.5        | [ssd300_coco_ssdv2_15](https://github.com/mzhaoshuai/Divide-and-Co-training/releases/download/1.0.3/ssd300_coco_ssdv2_15.zip) |
